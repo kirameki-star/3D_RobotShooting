@@ -51,21 +51,29 @@ public class PlayerController : MonoBehaviour
         {
             //左方向への速度を代入
             inputVelocityX = -this.velocityX;
+            //左移動のアニメーション
+            this.myAnimator.SetTrigger("WalkLeft");
         }
         else if (Input.GetKey(KeyCode.D))
         {
             //右方向への速度を代入
             inputVelocityX = this.velocityX;
+            //右移動のアニメーション
+            this.myAnimator.SetTrigger("WalkRight");
         }
         else if (Input.GetKey(KeyCode.W))
         {
             //前方向への速度を代入
             inputVelocityZ = this.velocityZ;
+            //前移動のアニメーション
+            this.myAnimator.SetTrigger("WalkFront");
         }
         else if (Input.GetKey(KeyCode.S))
         {
-            //前方向への速度を代入
+            //後ろ方向への速度を代入
             inputVelocityZ = -this.velocityZ;
+            //後ろ移動のアニメーション
+            this.myAnimator.SetTrigger("WalkBack");
         }
 
             //ジャンプしていない時にスペースが押されたらジャンプする（追加）
