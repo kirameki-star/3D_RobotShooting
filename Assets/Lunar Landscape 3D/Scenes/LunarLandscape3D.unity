@@ -202,14 +202,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 123561328}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 21.52, y: 4.25, z: -5.39}
+  m_LocalRotation: {x: 0.0162483, y: 0, z: 0, w: 0.99986804}
+  m_LocalPosition: {x: 20.98, y: 5.38, z: -5.35}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2836004474813076637}
   m_Father: {fileID: 2137635879}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 1.862, y: 0, z: 0}
 --- !u!114 &123561332
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3209,13 +3209,44 @@ GameObject:
   m_Component:
   - component: {fileID: 682252124}
   - component: {fileID: 675248860}
+  - component: {fileID: 682565177}
+  - component: {fileID: 682565178}
   m_Layer: 0
   m_Name: RedDragon
-  m_TagString: Untagged
+  m_TagString: EnemyTag
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!54 &682565177
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 682565176}
+  serializedVersion: 2
+  m_Mass: 1000
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
+--- !u!114 &682565178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 682565176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7849709007fb78f4fbd8ed7a60b4985e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitPoint: 10
 --- !u!1 &682567868
 GameObject:
   m_ObjectHideFlags: 0
@@ -3243,7 +3274,6 @@ GameObject:
   - component: {fileID: 682356606}
   - component: {fileID: 679418496}
   - component: {fileID: 682568061}
-  - component: {fileID: 682568062}
   m_Layer: 0
   m_Name: Dragon
   m_TagString: EnemyTag
@@ -3259,24 +3289,11 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 682568060}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 254.62332
   m_Center: {x: -291.16983, y: -11.615658, z: -96.51799}
---- !u!114 &682568062
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 682568060}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7849709007fb78f4fbd8ed7a60b4985e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hitPoint: 100
 --- !u!1 &682568340
 GameObject:
   m_ObjectHideFlags: 0
@@ -3303,7 +3320,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 682568340}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 100, y: 100, z: 100}
@@ -9365,7 +9382,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1351884792}
   m_LocalRotation: {x: -0.05822538, y: 0.8970357, z: -0.12432995, w: -0.4200939}
-  m_LocalPosition: {x: 12049, y: 10499, z: 5942}
+  m_LocalPosition: {x: 12091, y: 10316, z: 6042}
   m_LocalScale: {x: 100, y: 100.000015, z: 100}
   m_Children: []
   m_Father: {fileID: 2836004474813076637}

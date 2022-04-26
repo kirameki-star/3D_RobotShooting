@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
     //アニメーションするためのコンポーネントを入れる
     private Animator myAnimator;
 
-    //Unityちゃんを移動させるコンポーネントを入れる（追加）
+    //Playerを移動させるコンポーネントを入れる
     private Rigidbody myRigidbody;
 
     //前方向の速度
@@ -24,14 +24,14 @@ public class PlayerController : MonoBehaviour
 
     //動きを減速させる係数
     private float coefficient = 0.99f;
+
+
+
     // Start is called before the first frame update
     void Start()
     {
         //Animatorコンポーネントを取得
         this.myAnimator = GetComponent<Animator>();
-
-        //走るアニメーションを開始
-        this.myAnimator.SetFloat("Speed", 1);
 
         //Rigidbodyコンポーネントを取得
         this.myRigidbody = GetComponent<Rigidbody>();
@@ -46,58 +46,106 @@ public class PlayerController : MonoBehaviour
         float inputVelocityY = 0;
         float inputVelocityZ = 0;
 
-        //Unityちゃんを矢印キーまたはボタンに応じて左右に移動させる
+        //プレイヤーをWASDに応じて前後左右に移動させる
+        //前方向
+        if (Input.GetKey(KeyCode.W))
+        {
+            //前方向への速度を代入
+            inputVelocityZ = this.velocityZ;
+            //前移動のアニメーション
+            this.myAnimator.SetInteger("Type", 1);
+            this.myAnimator.SetFloat("Speed", 2);
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                this.myAnimator.SetFloat("Speed", 6);
+                inputVelocityZ = this.velocityZ + 10;
+            }
+            
+        }
+        else if (Input.GetKeyUp(KeyCode.W))
+        {
+            // Wを離したら
+            this.myAnimator.SetFloat("Speed", 0);
+        }
+
+        //左方向
         if (Input.GetKey(KeyCode.A))
         {
             //左方向への速度を代入
             inputVelocityX = -this.velocityX;
             //左移動のアニメーション
-            this.myAnimator.SetTrigger("WalkLeft");
+            this.myAnimator.SetInteger("Type" , 2);
+            this.myAnimator.SetFloat("Speed", 2);
+            
         }
-        else if (Input.GetKey(KeyCode.D))
+        else if (Input.GetKeyUp(KeyCode.A))
         {
-            //右方向への速度を代入
-            inputVelocityX = this.velocityX;
-            //右移動のアニメーション
-            this.myAnimator.SetTrigger("WalkRight");
+            // Aを離したら
+            this.myAnimator.SetFloat("Speed", 0);
         }
-        else if (Input.GetKey(KeyCode.W))
-        {
-            //前方向への速度を代入
-            inputVelocityZ = this.velocityZ;
-            //前移動のアニメーション
-            this.myAnimator.SetTrigger("WalkFront");
-        }
-        else if (Input.GetKey(KeyCode.S))
+
+        //後ろ方向
+        if (Input.GetKey(KeyCode.S))
         {
             //後ろ方向への速度を代入
             inputVelocityZ = -this.velocityZ;
             //後ろ移動のアニメーション
-            this.myAnimator.SetTrigger("WalkBack");
+            this.myAnimator.SetInteger("Type", 3);
+            this.myAnimator.SetFloat("Speed", 2);
         }
+        else if (Input.GetKeyUp(KeyCode.S))
+        {
+            // Sを離したら
+            this.myAnimator.SetFloat("Speed", 0);
+        }
+
+        //右方向
+        if (Input.GetKey(KeyCode.D))
+        {
+            //右方向への速度を代入
+            inputVelocityX = this.velocityX;
+            //右移動のアニメーション
+            this.myAnimator.SetInteger("Type", 4);
+            this.myAnimator.SetFloat("Speed", 2);
+           
+        }
+        else if (Input.GetKeyUp(KeyCode.D))
+        {
+            // Dを離したら
+            this.myAnimator.SetFloat("Speed", 0);
+        }
+
+        //Playerに速度を与える
+        this.myRigidbody.velocity = new Vector3(inputVelocityX, inputVelocityY, inputVelocityZ);
+
+        //リロード
+        if (Input.GetKey(KeyCode.R))
+        {
+            //Rを押したらリロードする
+            this.myAnimator.SetTrigger("Reload");
+        }
+
 
             //ジャンプしていない時にスペースが押されたらジャンプする（追加）
-            if ((Input.GetKeyDown(KeyCode.Space)) && this.transform.position.y < 0.5f)
-        {
-            //ジャンプアニメを再生
-            this.myAnimator.SetBool("Jump", true);
-            //上方向への速度を代入
-            inputVelocityY = this.velocityY;
-        }
-        else
-        {
-            //現在のY軸の速度を代入
-            inputVelocityY = this.myRigidbody.velocity.y;
-        }
+            /*if ((Input.GetKeyDown(KeyCode.Space)) && this.transform.position.y < 0.5f)
+            {
+                //ジャンプアニメを再生
+                this.myAnimator.SetBool("Jump", true);
+                //上方向への速度を代入
+                inputVelocityY = this.velocityY;
+            }
+            else
+            {
+                //現在のY軸の速度を代入
+                inputVelocityY = this.myRigidbody.velocity.y;
+            }
 
-        //Jumpステートの場合はJumpにfalseをセットする
-        if (this.myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Jump"))
-        {
-            this.myAnimator.SetBool("Jump", false);
-        }
-
-        //Unityちゃんに速度を与える（変更）
-        this.myRigidbody.velocity = new Vector3(inputVelocityX, inputVelocityY, inputVelocityZ);
+            //Jumpステートの場合はJumpにfalseをセットする
+            if (this.myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Jump"))
+            {
+                this.myAnimator.SetBool("Jump", false);
+            }*/
+                        
     }
 }
 
