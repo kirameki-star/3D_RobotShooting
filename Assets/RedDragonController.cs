@@ -1,15 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class RedDragonController : MonoBehaviour
 {
-    private int StateNumber = 0;
+	//攻撃判定用オブジェクト
+	//public GameObject EnemyAttackPrefab;
 
-    private float TimeCounter = 0f;
+	private int StateNumber = 0;
+
+	//汎用タイマー
+    private float timeCounter = 0f;
+
+	//攻撃用タイマー
+	private float attacktimeCounter = 0f;
 
     //プレイヤーのオブジェクト
-    private GameObject player;
+    public GameObject player;
+
+	public GameObject enemyAttackPrefab;
 
     //アニメーションするためのコンポーネントを入れる
     private Animator myAnimator;
@@ -35,18 +45,16 @@ public class RedDragonController : MonoBehaviour
 	//ダメージキャンセル
 	private float DamageCancel = 0f;
 
-	//ライフ
-	private int Life = 3;
-
-	//死亡
+	//死亡フラグ
 	private bool isDie = false;
 
-	//敵のHP
-	public int hitPoint = 100;  //HP
+	private Collider attack;
 
-	//--------------------------------------------------------------------------------
-	// 角度クリップ
-	//--------------------------------------------------------------------------------
+	//敵のHP
+	public int life = 10;  //HP
+
+	//NavMeshAgent型を変数agentで宣言
+	NavMeshAgent agent;
 
 	private float ClipDirection360(float direction)
 	{
@@ -72,10 +80,6 @@ public class RedDragonController : MonoBehaviour
 		return direction - 180.0f;
 	}
 
-	//--------------------------------------------------------------------------------
-	// 方向・角度
-	//--------------------------------------------------------------------------------
-
 	private float GetDirection(float x1, float y1, float x2, float y2)
 	{
 		if ((x2 - x1) == 0.0f && (y2 - y1) == 0.0f)
@@ -93,14 +97,29 @@ public class RedDragonController : MonoBehaviour
 		return Mathf.Sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
 	}
 
+	private void Moving()
+	{
+		//向いている方向を得る（オイラー）
+		float direction = this.transform.rotation.eulerAngles.y;
+
+	}
+
+
 	// Start is called before the first frame update
 	void Start()
     {
+		//GetComponentでNavMeshAgentを取得して
+		//変数agentで宣言します。
+		agent = GetComponent<NavMeshAgent>();
+
 		//初期位置の記録
 		StartPosition = this.transform.position;
 
 		//Playerのオブジェクトを取得
 		this.player = GameObject.Find("Player");
+
+		//攻撃判定用オブジェクトを取得
+		this.enemyAttackPrefab = GameObject.Find("EnemyAttackPrefab");
 
 		//アニメータコンポーネントを取得
 		this.myAnimator = GetComponent<Animator>();
@@ -108,227 +127,87 @@ public class RedDragonController : MonoBehaviour
 		//Rigidbodyコンポーネントを取得
 		this.myRigidbody = GetComponent<Rigidbody>();
 
-		//初期の待機タイマーをランダムにする
-		TimeCounter = Random.Range(-3f, 0f);
+		//攻撃判定用オブジェクトのBoxColliderコンポーネントを取得
+		attack = enemyAttackPrefab.GetComponent<BoxCollider>();
+
 	}
-	private void Moving()
-	{
-		//向いている方向を得る（オイラー）
-		float direction = this.transform.rotation.eulerAngles.y;
-
-		//歩くアニメーションを開始
-		this.myAnimator.SetFloat("Speed", velocity);
-
-		//速度を与える（オイラー→ラジアン）※Y軸のvelocityスルー
-		this.myRigidbody.velocity = new Vector3(Mathf.Sin(direction * Mathf.Deg2Rad) * velocity, this.myRigidbody.velocity.y, Mathf.Cos(direction * Mathf.Deg2Rad) * velocity);
-	}
-
-	/*private void StateMachine()
-	{
-		//ユニティちゃんの方向
-		float direction = GetDirection(this.transform.position.x, this.transform.position.z, player.transform.position.x, player.transform.position.z);
-		//ユニティちゃんの距離
-		float length = GetLength(this.transform.position.x, this.transform.position.z, player.transform.position.x, player.transform.position.z);
-
-		//ステート振り分け
-		switch (StateNumber)
-		{
-			//3秒待機
-			case 0:
-				{   //3秒動かない
-					if (TimeCounter > 3f)
-					{
-						//X,Z固定
-						//GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
-
-						//クリアー
-						TimeCounter = 0f;
-
-						//プレイヤーの距離が10m以上なら【ちょっと動く】
-						if (length > 10f)
-						{
-							//ランダムで少し方向を変える
-							this.transform.Rotate(new Vector3(0f, Random.Range(-30f, 30f), 0f));
-							//遷移 ※ちょっと動く（索敵）
-							StateNumber = 1;
-						}
-						else
-						{
-							//視界の範囲に入っている？
-							if (Mathf.DeltaAngle(this.transform.rotation.eulerAngles.y, direction) > -60f && Mathf.DeltaAngle(this.transform.rotation.eulerAngles.y, direction) < 60f)
-							{
-								//回転
-								this.transform.Rotate(new Vector3(0f, Mathf.DeltaAngle(this.transform.rotation.eulerAngles.y, direction), 0f));
-								//遷移 ※プレイヤーに近づく
-								StateNumber = 2;
-							}
-							else
-							{
-								//ランダムで少し方向を変える
-								this.transform.Rotate(new Vector3(0f, Random.Range(-30f, 30f), 0f));
-								//遷移 ※ちょっと動く（索敵）
-								StateNumber = 1;
-							}
-						}
-					}
-				}
-				break;
-
-			//ちょっと動く（索敵）
-			case 1:
-				{   //移動
-					Moving();
-
-					//3秒経ったら3秒待機に戻す
-					if (TimeCounter > 3f)
-					{
-						//最初の地点からの距離を求める
-						float lengthmax = GetLength(StartPosition.x, StartPosition.z, this.transform.position.x, this.transform.position.z);
-
-						//7メートル離れた
-						if (lengthmax > 7f)
-						{
-							//ランダムで反対方向へ変える
-							this.transform.Rotate(new Vector3(0f, Random.Range(150f, 210f), 0f));
-						}
-
-						//クリアー
-						TimeCounter = 0f;
-						//歩くアニメーションを停止
-						this.myAnimator.SetFloat("Speed", 0f);
-						//遷移 ※3秒待機
-						StateNumber = 0;
-					}
-
-					//壁に衝突した
-					if (isWall && isGround)
-					{
-						//ランダムで反対方向へ変える 2021/12/27 ３０°から反対にした。
-						this.transform.Rotate(new Vector3(0f, Random.Range(150f, 210f), 0f));
-						//クリアー
-						TimeCounter = 0f;
-						//歩くアニメーションを停止
-						this.myAnimator.SetFloat("Speed", 0f);
-						//ジャンプのアニメーション
-						this.myAnimator.SetTrigger("Jump");
-						//ジャンプ
-						StateNumber = 4;
-					}
-				}
-				break;
-
-			//プレイヤーに近づく
-			case 2:
-				{   //移動
-					Moving();
-
-					//7秒経ったら3秒待機に戻す
-					if (TimeCounter > 7f)
-					{
-						//クリアー
-						TimeCounter = 0f;
-						//歩くアニメーションを停止
-						this.myAnimator.SetFloat("Speed", 0f);
-						//遷移 ※3秒待機
-						StateNumber = 0;
-					}
-
-					//壁に衝突した
-					if (isWall && isGround)
-					{
-						//クリアー
-						TimeCounter = 0f;
-						//歩くアニメーションを停止
-						this.myAnimator.SetFloat("Speed", 0f);
-						//ジャンプのアニメーション
-						this.myAnimator.SetTrigger("Jump");
-						//ジャンプ
-						StateNumber = 4;
-					}
-
-					//攻撃が届く距離？
-					if (length < 1f)
-					{
-						//クリアー
-						TimeCounter = 0f;
-						//歩くアニメーションを停止
-						this.myAnimator.SetFloat("Speed", 0f);
-						//攻撃のアニメーション
-						this.myAnimator.SetTrigger("Attack");
-						//遷移 ※攻撃
-						StateNumber = 3;
-					}
-				}
-				break;
-
-			//攻撃
-			case 3:
-				{   //1秒経った？
-					if (TimeCounter > 1f)
-					{
-						//クリアー
-						TimeCounter = 0f;
-						//遷移 ※3秒待機
-						StateNumber = 0;
-					}
-				}
-				break;
-
-			//ジャンプ
-			case 4:
-				{   //移動
-					Moving();
-
-					//3秒経ったら3秒待機に戻す
-					if (TimeCounter > 3f)
-					{
-						//クリアー
-						TimeCounter = 0f;
-						//遷移 ※3秒待機
-						StateNumber = 0;
-					}
-				}
-				break;
-			
-			case 5:
-                {
-					if (TimeCounter > 1f)
-					{
-						Destroy(this.gameObject);
-					}
-				}
-				break;
-			default: break;
-		}
-	}*/
+	
 
 	// Update is called once per frame
 	void Update()
 	{
-		if (hitPoint <= 0)
-		{
-			this.myAnimator.SetTrigger("Die");
-			TimeCounter = 0f;
-			StateNumber = 5;
+		//プレイヤーの方向
+		float direction = GetDirection(this.transform.position.x, this.transform.position.z, player.transform.position.x, player.transform.position.z);
+		//プレイヤーの距離
+		float length = GetLength(this.transform.position.x, this.transform.position.z, player.transform.position.x, player.transform.position.z);
+
+		//Debug.Log("距離"+length);
+		//Debug.Log("方向" + direction);
+		
+		//プレイヤーに近づいたら攻撃
+		if (length < 7.0f)
+        {
+			//this.myAnimator.SetTrigger("Attack");
+			this.myAnimator.SetInteger("Attack", 1);
+			attacktimeCounter = 0f;
+
+		    //攻撃時のみ攻撃判定用オブジェクトの衝突判定をオンにする
+			attack.isTrigger = false;
 
 		}
-	}
-    //ダメージを受け取ってHPを減らす関数
-    public void Damage(int damage)
-    {
-        //受け取ったダメージ分HPを減らす
-        hitPoint -= damage;
-    }
 
-    void OnTriggerEnter(Collider other)
-    {
 
-        //ぶつかったオブジェクトのTagにShellという名前が書いてあったならば（条件）.
-        if (other.CompareTag("ShellTag"))
+		attacktimeCounter += Time.deltaTime;
+
+		//攻撃の後に攻撃判定用オブジェクトの衝突判定をオフにする
+		if (attacktimeCounter > 1.5f　&& attack.isTrigger == false)
         {
-            //HPを減らす
-            hitPoint--;
-        }
-    }
+			attack.isTrigger = true;
+			this.myAnimator.SetInteger("Attack", 0);
 
+		}
+		//死亡フラグがfalseのとき
+		if (isDie == false)
+        {
+			//Nav Mesh Agentが設定されたObjectがPlayerGameObjectの後を追いかける
+			agent.destination = player.transform.position;
+			this.myAnimator.SetFloat("Speed", 2);
+
+			//Debug.Log("" + target.transform.position);
+		}
+			
+		//敵の体力が0以下で死亡フラグがfalseのとき
+		if (life <= 0 && isDie == false)
+		{
+			this.myAnimator.SetTrigger("Die");
+			timeCounter = 0f;
+			
+			//死亡フラグをtrueにする
+			isDie = true;
+			//Nav Mesh Agentに自身の現在座標を取得させ動かないようにする
+			agent.destination = this.transform.position;
+		}
+		
+		//死亡してから4秒後にオブジェクト破棄
+		if(isDie == true)
+        {
+			timeCounter += Time.deltaTime;
+
+			if (timeCounter > 4f)
+			{
+				Destroy(this.gameObject);
+			}
+		}
+
+	}
+	void OnTriggerEnter(Collider other)
+    {
+		//ShellTag（銃弾）に当たったら体力を減らす
+		if (other.gameObject.tag == "ShellTag")
+        {
+			life--;
+        }
+
+	}
+	
 }
